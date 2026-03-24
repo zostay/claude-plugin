@@ -4,6 +4,8 @@
 *~
 .session.vim
 
+/.idea
+
 # OS
 .DS_Store
 Thumbs.db
