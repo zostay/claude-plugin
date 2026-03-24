@@ -13,17 +13,22 @@ other repository automation.
 
 ## Installation
 
-Install directly from GitHub:
+### Per-session (local checkout)
 
-```bash
-claude plugin add --from github:zostay/zed
-```
-
-Or clone and install from a local checkout:
+Clone the repo and load the plugin for your current session:
 
 ```bash
 git clone https://github.com/zostay/zed.git
-claude plugin add --from ./zed
+claude --plugin-dir ./zed
+```
+
+### Persistent install via marketplace
+
+Add this repo as a marketplace, then install the plugin:
+
+```bash
+claude plugin marketplace add https://github.com/zostay/zed
+claude plugin install zed
 ```
 
 ## Skills
@@ -79,6 +84,7 @@ passing) using the repository's default merge method.
 ```
 .claude-plugin/
   plugin.json       # Plugin manifest
+  marketplace.json  # Marketplace manifest (for install via marketplace)
 skills/             # Custom skills (invoked via /zed:skill-name)
 agents/             # Custom agent definitions
 hooks/              # Event hooks for Claude Code lifecycle events

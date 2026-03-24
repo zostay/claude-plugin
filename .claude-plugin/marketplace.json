@@ -1,0 +1,18 @@
+{
+  "name": "zostay",
+  "owner": {
+    "name": "zostay"
+  },
+  "metadata": {
+    "description": "Personal Claude Code plugin with custom skills for Dependabot maintenance and repository automation."
+  },
+  "plugins": [
+    {
+      "name": "zed",
+      "source": {
+        "source": "github",
+        "repo": "zostay/zed"
+      }
+    }
+  ]
+}
