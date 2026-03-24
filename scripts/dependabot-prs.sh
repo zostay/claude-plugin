@@ -3,6 +3,12 @@
 # Fetch open Dependabot PRs for the current repository and their merge readiness.
 # Outputs one JSON object per line (JSONL), sorted by oldest first.
 #
+# Output fields:
+#   number, title, branch, mergeable, checks_pass, review_decision, url
+#
+# checks_pass is true/false when status check info is available, or null when
+# the token lacks checks:read permission (statusCheckRollup inaccessible).
+#
 
 set -euo pipefail
 
@@ -18,45 +24,59 @@ repo=$(gh repo view --json nameWithOwner --jq '.nameWithOwner' 2>/dev/null) || {
   exit 1
 }
 
-# Fetch open Dependabot PRs (oldest first)
-pr_numbers=$(gh pr list \
+base_fields="number,title,headRefName,mergeable,reviewDecision,url"
+
+# Try fetching with statusCheckRollup (requires checks:read token permission).
+# If that fails, fall back to fetching without it.
+has_checks=true
+pr_json=$(gh pr list \
   --author "app/dependabot" \
   --state open \
-  --json number \
-  --jq '.[].number' 2>/dev/null) || {
-  echo "Error: failed to list Dependabot PRs. Check that you have access to ${repo}." >&2
-  exit 1
+  --limit 100 \
+  --json "${base_fields},statusCheckRollup" 2>/dev/null) || {
+  has_checks=false
+  pr_json=$(gh pr list \
+    --author "app/dependabot" \
+    --state open \
+    --limit 100 \
+    --json "${base_fields}" 2>/dev/null) || {
+    echo "Error: failed to list Dependabot PRs. Check that you have access to ${repo}." >&2
+    exit 1
+  }
 }
 
-if [ -z "$pr_numbers" ]; then
+# Check if any PRs were found
+pr_count=$(echo "$pr_json" | jq 'length')
+if [ "$pr_count" -eq 0 ]; then
   echo "No open Dependabot PRs for ${repo}."
   exit 0
 fi
 
-# For each PR, fetch detailed merge-readiness info and emit JSONL
-for pr in $pr_numbers; do
-  pr_json=$(gh pr view "$pr" \
-    --json number,title,headRefName,mergeable,reviewDecision,url,statusCheckRollup 2>/dev/null) || continue
-
-  # Determine if all checks pass: SUCCESS or NEUTRAL means passing.
-  # If there are no checks, we consider it passing.
-  checks_pass=$(echo "$pr_json" | jq -r '
-    if (.statusCheckRollup | length) == 0 then
-      true
-    else
-      [.statusCheckRollup[] | .status == "COMPLETED" and (.conclusion == "SUCCESS" or .conclusion == "NEUTRAL")] | all
-    end
-  ')
-
-  echo "$pr_json" | jq -c \
-    --argjson checks_pass "$checks_pass" \
-    '{
-      number: .number,
-      title: .title,
-      branch: .headRefName,
-      mergeable: .mergeable,
-      checks_pass: $checks_pass,
-      review_decision: .reviewDecision,
-      url: .url
-    }'
-done
+# Emit JSONL, oldest first (gh returns newest first, so reverse)
+if [ "$has_checks" = true ]; then
+  echo "$pr_json" | jq -c 'reverse | .[] | {
+    number: .number,
+    title: .title,
+    branch: .headRefName,
+    mergeable: .mergeable,
+    checks_pass: (
+      if (.statusCheckRollup | length) == 0 then
+        true
+      else
+        [.statusCheckRollup[] | .status == "COMPLETED" and (.conclusion == "SUCCESS" or .conclusion == "NEUTRAL")] | all
+      end
+    ),
+    review_decision: .reviewDecision,
+    url: .url
+  }'
+else
+  echo "$pr_json" | jq -c 'reverse | .[] | {
+    number: .number,
+    title: .title,
+    branch: .headRefName,
+    mergeable: .mergeable,
+    checks_pass: null,
+    review_decision: .reviewDecision,
+    url: .url
+  }'
+fi

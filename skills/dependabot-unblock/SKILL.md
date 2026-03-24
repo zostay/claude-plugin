@@ -29,14 +29,15 @@ Parse the JSONL output. Each line is a JSON object with these fields:
 - `title` — PR title
 - `branch` — head branch name
 - `mergeable` — merge state: `MERGEABLE`, `CONFLICTING`, or `UNKNOWN`
-- `checks_pass` — boolean, true if all status checks succeeded
+- `checks_pass` — boolean or null; true if all status checks succeeded, false if any failed, null if check info is unavailable (token lacks `checks:read` permission)
 - `review_decision` — review decision (may be empty if no reviews required)
 - `url` — PR URL
 
-Categorize PRs into two groups:
+Categorize PRs into three groups:
 
 1. **Conflicting** — `mergeable` is `CONFLICTING`
 2. **Failing checks** — `checks_pass` is `false` AND `mergeable` is NOT `CONFLICTING` (to avoid double-handling)
+3. **Checks unknown** — `checks_pass` is `null`; note these in the summary but do not investigate (check status cannot be determined)
 
 If no PRs are in either group, tell the user there are no blocked Dependabot PRs and stop.
 

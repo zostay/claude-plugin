@@ -29,14 +29,14 @@ Parse the JSONL output. Each line is a JSON object with these fields:
 - `title` — PR title
 - `branch` — head branch name
 - `mergeable` — merge state: `MERGEABLE`, `CONFLICTING`, or `UNKNOWN`
-- `checks_pass` — boolean, true if all status checks succeeded
+- `checks_pass` — boolean or null; true if all status checks succeeded, false if any failed, null if check info is unavailable (token lacks `checks:read` permission)
 - `review_decision` — review decision (may be empty if no reviews required)
 - `url` — PR URL
 
 A PR is **ready to merge** when both conditions are met:
 
 1. `mergeable` is `MERGEABLE`
-2. `checks_pass` is `true`
+2. `checks_pass` is `true` OR `null` (when null, use `--auto` to let GitHub enforce branch protection rules)
 
 Filter the list to only ready-to-merge PRs.
 

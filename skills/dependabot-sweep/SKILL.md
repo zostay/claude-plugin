@@ -34,15 +34,16 @@ Parse the JSONL output. Each line is a JSON object with these fields:
 - `title` — PR title
 - `branch` — head branch name
 - `mergeable` — merge state: `MERGEABLE`, `CONFLICTING`, or `UNKNOWN`
-- `checks_pass` — boolean, true if all status checks succeeded
+- `checks_pass` — boolean or null; true if all status checks succeeded, false if any failed, null if check info is unavailable (token lacks `checks:read` permission)
 - `review_decision` — review decision (may be empty if no reviews required)
 - `url` — PR URL
 
-Categorize every PR into one of three groups:
+Categorize every PR into one of four groups:
 
 1. **Conflicting** — `mergeable` is `CONFLICTING`
 2. **Failing checks** — `checks_pass` is `false` AND `mergeable` is NOT `CONFLICTING`
 3. **Ready to merge** — `mergeable` is `MERGEABLE` AND `checks_pass` is `true`
+4. **Checks unknown** — `checks_pass` is `null` AND `mergeable` is `MERGEABLE` (treat as ready to merge with `--auto`, which lets GitHub enforce branch protection rules)
 
 For **every** conflicting PR, request a rebase:
 
@@ -56,7 +57,7 @@ Do **not** investigate failing-checks PRs — that requires checking out branche
 
 ### 3. Merge ready PRs (remote-only)
 
-Using the PR data already fetched in Step 2 (do **not** re-fetch), find all ready-to-merge PRs.
+Using the PR data already fetched in Step 2, find all ready-to-merge PRs.
 
 For **every** ready PR, oldest first:
 
@@ -65,6 +66,18 @@ gh pr merge <number> --auto
 ```
 
 Log each merge attempt and its result. If an individual merge fails, log the error and continue with the next PR.
+
+**Important:** After each successful merge, re-fetch PR data before attempting the next merge:
+
+```bash
+bash "${CLAUDE_PLUGIN_ROOT}/scripts/dependabot-prs.sh"
+```
+
+A merge can cause other PRs to become conflicting. After re-fetching:
+
+- If a PR you were about to merge is now `CONFLICTING`, request a rebase instead (`gh pr comment <number> --body "@dependabot rebase"`) and log it as rebased, not merged.
+- If new conflicts appeared on PRs that were already handled in Step 2, skip them (they were already rebased).
+- Continue merging remaining ready PRs from the updated data.
 
 ### 4. Fix vulnerability alerts (local changes)
 
