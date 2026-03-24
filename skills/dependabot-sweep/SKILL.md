@@ -126,10 +126,15 @@ For each package, in priority order, up to a maximum of **10** packages:
 1. Find the manifest file(s) that declare the dependency (use the `manifest` field as a starting point)
 2. Update the dependency to the patched version. If multiple alerts affect the same package, use the highest patched version to resolve all of them
 3. Run the project's install/lock command to update the lockfile (e.g., `npm install`, `pip install`, `bundle install`, `go mod tidy`, etc.)
-4. Run the project's test suite if one exists
-5. If tests pass: commit with message `fix(deps): update <package> to <version> (resolves N alert(s))` and continue to the next package
-6. If tests fail: attempt a trivial fix. If not possible, revert the changes for this package and **stop fixing further packages** — do not proceed to remaining packages
-7. Log each fix or skip
+4. **Pin npm versions**: If the ecosystem is npm, verify the version written to `package.json` is an exact pinned version (e.g., `1.2.3`). Remove any range prefix (`^`, `~`) that npm may have added. Re-run `npm install` after correcting the version to keep the lockfile in sync.
+5. **Version consistency check**: If the update changes a language or runtime version (e.g., Go directive in `go.mod`, Node.js version in `engines`/`.nvmrc`, a `setup-go`/`setup-node` action version), audit all places that declare that version and update them to match:
+   - Project config: `go.mod`, `package.json` `engines`, `.nvmrc`, `.node-version`, `.tool-versions`, `.python-version`
+   - CI workflows: `.github/workflows/*.yml` (`setup-go`, `setup-node`, `setup-python`, etc.)
+   - Containers: `Dockerfile*` (`FROM` directives)
+6. Run the project's test suite if one exists
+7. If tests pass: commit with message `fix(deps): update <package> to <version> (resolves N alert(s))` and continue to the next package
+8. If tests fail: attempt a trivial fix. If not possible, revert the changes for this package and **stop fixing further packages** — do not proceed to remaining packages
+9. Log each fix or skip
 
 ### 5. Update changelog
 

@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.1.3 — 2026-03-24
+
+### Added
+
+- npm version pinning: dependabot-fix and dependabot-sweep now strip `^`/`~`
+  prefixes from `package.json` versions to ensure exact pinned versions
+- Language/runtime version consistency checks: dependabot-fix, dependabot-sweep,
+  and dependabot-unblock now audit `go.mod`, CI workflows, Dockerfiles, and
+  other config files to keep language versions in sync after a bump
+
 ## 0.1.2 — 2026-03-24
 
 ### Changed

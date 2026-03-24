@@ -66,7 +66,12 @@ Investigate and apply the fix:
 1. Find the manifest file(s) that declare the dependency (use the `manifest` field from the alerts as a starting point)
 2. Update the dependency to the patched version. If multiple alerts affect the same package, ensure the version you choose resolves all of them (use the highest patched version)
 3. Run the project's install/lock command to update the lockfile (e.g., `npm install`, `pip install`, `bundle install`, `go mod tidy`, etc.)
-4. Run the project's test suite if one exists to verify nothing is broken
-5. If tests fail, investigate and fix the breakage
+4. **Pin npm versions**: If the ecosystem is npm, verify the version written to `package.json` is an exact pinned version (e.g., `1.2.3`). Remove any range prefix (`^`, `~`) that npm may have added. Re-run `npm install` after correcting the version to keep the lockfile in sync.
+5. **Version consistency check**: If the update changes a language or runtime version (e.g., Go directive in `go.mod`, Node.js version in `engines`/`.nvmrc`, a `setup-go`/`setup-node` action version), audit all places that declare that version and update them to match:
+   - Project config: `go.mod`, `package.json` `engines`, `.nvmrc`, `.node-version`, `.tool-versions`, `.python-version`
+   - CI workflows: `.github/workflows/*.yml` (`setup-go`, `setup-node`, `setup-python`, etc.)
+   - Containers: `Dockerfile*` (`FROM` directives)
+6. Run the project's test suite if one exists to verify nothing is broken
+7. If tests fail, investigate and fix the breakage
 
 After fixing, summarize what was changed and suggest the user commit the result.

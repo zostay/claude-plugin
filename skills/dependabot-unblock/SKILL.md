@@ -59,8 +59,9 @@ Select the **first** (oldest) PR from the "failing checks" group. Only handle on
 2. Run `gh pr checks <number>` to see which checks are failing
 3. Check out the PR branch: `git checkout <branch>`
 4. Investigate the failures — look at CI output, run tests locally if possible
-5. If a trivial fix is apparent (e.g., a minor code adjustment, linting fix, type error), implement it, commit, and push to the PR branch
-6. If no trivial fix is possible, report findings to the user and stop — do not attempt complex fixes
+5. **Check for version inconsistencies**: If the PR bumps a language or runtime version (e.g., `actions/setup-go`, Go module directive, Node.js version), check whether the version is declared in multiple places and only updated in one. Look across project config (`go.mod`, `package.json` `engines`, `.nvmrc`, `.node-version`, `.tool-versions`, `.python-version`), CI workflows (`.github/workflows/*.yml`), and Dockerfiles (`FROM` directives). Mismatches are a common cause of check failures on version-bump PRs — fix all locations to use the same version.
+6. If a trivial fix is apparent (e.g., a minor code adjustment, linting fix, type error, version mismatch), implement it, commit, and push to the PR branch
+7. If no trivial fix is possible, report findings to the user and stop — do not attempt complex fixes
 
 ### 5. Report summary
 
