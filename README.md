@@ -1,4 +1,4 @@
-# claude-plugin
+# zed
 
 Personal Claude Code plugin with custom skills for Dependabot maintenance and
 other repository automation.
@@ -16,19 +16,19 @@ other repository automation.
 Install directly from GitHub:
 
 ```bash
-claude plugin add --from github:zostay/claude-plugin
+claude plugin add --from github:zostay/zed
 ```
 
 Or clone and install from a local checkout:
 
 ```bash
-git clone https://github.com/zostay/claude-plugin.git
-claude plugin add --from ./claude-plugin
+git clone https://github.com/zostay/zed.git
+claude plugin add --from ./zed
 ```
 
 ## Skills
 
-All skills are invoked as `/claude-plugin:<skill-name>` from within Claude Code.
+All skills are invoked as `/zed:<skill-name>` from within Claude Code.
 
 ### `dependabot-sweep`
 
@@ -43,7 +43,7 @@ work of the other three skills:
 5. Pushes the branch and opens a PR with a summary of all actions
 
 ```
-/claude-plugin:dependabot-sweep
+/zed:dependabot-sweep
 ```
 
 ### `dependabot-fix`
@@ -53,7 +53,7 @@ alerts, ranks by severity/CVSS/impact, updates the dependency to the patched
 version, and runs tests to verify.
 
 ```
-/claude-plugin:dependabot-fix
+/zed:dependabot-fix
 ```
 
 ### `dependabot-unblock`
@@ -62,7 +62,7 @@ Unblock stuck Dependabot PRs. Requests rebases for conflicting PRs, then
 investigates the first PR with failing checks and attempts a trivial fix.
 
 ```
-/claude-plugin:dependabot-unblock
+/zed:dependabot-unblock
 ```
 
 ### `dependabot-merge`
@@ -71,7 +71,7 @@ Merge the oldest open Dependabot PR that is ready (no conflicts, all checks
 passing) using the repository's default merge method.
 
 ```
-/claude-plugin:dependabot-merge
+/zed:dependabot-merge
 ```
 
 ## Project Structure
@@ -79,7 +79,7 @@ passing) using the repository's default merge method.
 ```
 .claude-plugin/
   plugin.json       # Plugin manifest
-skills/             # Custom skills (invoked via /claude-plugin:skill-name)
+skills/             # Custom skills (invoked via /zed:skill-name)
 agents/             # Custom agent definitions
 hooks/              # Event hooks for Claude Code lifecycle events
 scripts/            # Helper scripts used by skills, agents, or hooks
@@ -107,7 +107,7 @@ description: What this skill does and when to use it.
 Instructions for Claude when this skill is invoked...
 ```
 
-The skill will be available as `/claude-plugin:my-skill`.
+The skill will be available as `/zed:my-skill`.
 
 ### Adding an Agent
 
