@@ -301,8 +301,10 @@ investigates the first PR with failing checks and attempts a trivial fix.
 Check out a pull request (the current branch's PR or a named one) and work
 through every review on it — human reviewers and review agents alike. If the PR
 has no automated review newer than its latest commit, one is generated **locally**
-(the `copilot` CLI, the codex CLI, or Claude's `code-review` skill, in that order)
 and posted to the PR as a comment; a human review does not remove the need for it.
+An external review CLI (`copilot`, then `codex`) is used when one is installed,
+since a different model notices different things; with neither installed, Claude's
+own `code-review` skill does the review and the result is treated the same way.
 Nothing is requested from, or waited on, a GitHub-hosted review agent.
 
 Each finding is then evaluated against the current code, the warranted fixes are

@@ -1,5 +1,31 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+
+- **`pr-review-fix` treats a review from Claude's own `code-review` skill as a
+  complete review.**
+
+  Step 3c ranked its review generators as though only an external CLI produced a
+  real review: the `copilot` CLI was "the primary path", and the `code-review`
+  skill was "the last resort because it is not an independent model". A run on a
+  machine with no external review CLI installed therefore read as degraded —
+  warnings about the missing tool, caveats hung on the findings, suggestions to
+  install something — when nothing about the outcome was actually deficient.
+  Having no external CLI installed is an ordinary configuration.
+
+  The preference for a third-party CLI stays, since a different model notices
+  different things, but it is now a nice-to-have rather than the expected path:
+  the generator list is introduced with "every path below produces a real review",
+  the `code-review` entry is "a complete review, not a degraded one", and an
+  explicit rule says to take the next path when a tool is absent and say nothing
+  further about it. The report names the review source as a plain fact.
+
+  Unchanged: a review is still always generated and posted, `copilot` and `codex`
+  are still tried first when present, and an automated review is still required in
+  addition to any human review.
+
 ## 0.15.0 — 2026-09-01
 
 ### Changed
