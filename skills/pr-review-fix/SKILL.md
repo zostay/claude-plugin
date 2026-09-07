@@ -23,9 +23,9 @@ Every run of this skill satisfies both of these. They are independent:
 
 This skill does **not** request or wait for a GitHub-hosted review agent, and it
 does not inspect the PR timeline for one. Automated reviews are run **locally**,
-by whichever reviewer Step 3c finds installed. A hosted review that has *already
-posted* is read like any other agent review in 3a; one that has not is simply not
-waited for.
+by the first reviewer Step 3c can run. A hosted review that has *already posted*
+is read like any other agent review in 3a; one that has not is simply not waited
+for.
 
 ## Steps
 
@@ -178,8 +178,10 @@ available and move on:
 Having no external review CLI installed is a normal configuration, not a problem
 to solve. Check with `command -v`, take the next path when it is absent, and say
 nothing further about it — no warning, no caveat attached to the findings, no
-suggestion that anything be installed or subscribed to. Mention which reviewer
-ran only where the report asks for it, or if the operator asks.
+suggestion that anything be installed or subscribed to. Naming the reviewer that
+ran is not editorializing, though: the `## Automated review (<tool>)` header below
+and the Step 9 report both record it, and both name `code-review` exactly as they
+would name `copilot`.
 
 Give every path the **same review prompt**, instructing the reviewer to discover
 its inputs itself and review based only on them:
@@ -192,9 +194,9 @@ and consistency — not praise. The copilot and codex CLIs run in the checked-ou
 repo cwd and already have the diff locally; tell a Claude subagent the PR number
 and repo so it can fetch both itself.
 
-**Post the generated review to the PR** — always, whichever reviewer produced
-it. The ticket is the record of what was reviewed, and a
-review that exists only in this session is invisible to everyone else:
+**Post the generated review to the PR** — always, whichever reviewer produced it.
+The ticket is the record of what was reviewed, and a review that exists only in
+this session is invisible to everyone else:
 
 ```bash
 tmp=$(mktemp)
